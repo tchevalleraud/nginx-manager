@@ -1,0 +1,9 @@
+version: "3"
+services:
+  nginx-manager:
+    container_name: nginx-manager
+    image: tchevalleraud/nginx-manager:latest
+    ports:
+      - 8080:80
+      - 8443:443
+      - 8081:81

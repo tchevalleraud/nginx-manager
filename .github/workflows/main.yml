@@ -1,0 +1,37 @@
+name: Nginx-Manager
+on:
+    push:
+        branches: [ master ]
+jobs:
+    clean:
+        runs-on: [self-hosted]
+        steps:
+            - name: Stop docker container
+              continue-on-error: true
+              run: docker stop $(docker ps -f name=nginx-manager -a -q)
+
+            - name: Delete docker container
+              continue-on-error: true
+              run: docker rm $(docker ps -f name=nginx-manager -a -q)
+
+            - name: Delete directory
+              run: sudo rm -Rf ./nginx-manager/
+    init:
+        runs-on: [self-hosted]
+        needs: [clean]
+        steps:
+            - name: Clone repo
+              run: git clone git@github.com:tchevalleraud/nginx-manager.git
+    build:
+        runs-on: [self-hosted]
+        needs: [init]
+        steps:
+            - name: Build docker image
+              run: |
+                cd ./nginx-manager/
+                docker build -t tchevalleraud/nginx-manager:latest ./docker/
+
+            - name: Run docker stack
+              run: |
+                cd ./nginx-manager/
+                docker-compose -f ./docker-compose.yml up -d
